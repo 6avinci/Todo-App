@@ -1,0 +1,330 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'add_item_dialog.dart';
+//import 'to_do_item.dart';
+import 'database.dart';
+
+void main() => runApp(const MaterialApp(home: ToDo()));
+
+class ToDo extends StatefulWidget {
+  const ToDo({super.key});
+
+  @override
+  _ToDoState createState() => _ToDoState();
+}
+
+class _ToDoState extends State<ToDo> {
+  late User user;
+  late DatabaseService database;
+
+  bool get value => true;
+
+  void addItem(String item) {
+    database.setTodo(item, false);
+    Navigator.pop(context);
+  }
+
+  void deleteItem(String key) {
+    database.deleteTodo(key);
+  }
+
+  void toggleDone(String key) {
+    database.setTodo(key, value);
+  }
+
+  void newEntry() {
+    showDialog<AlertDialog>(
+        context: context,
+        builder: (BuildContext context) {
+          return AddItemDialog(addItem);
+        });
+  }
+
+  void connectToFirebase() async {
+    final FirebaseAuth authenticate = FirebaseAuth.instance;
+    UserCredential result = await authenticate.signInAnonymously();
+    user = result.user!;
+    database = DatabaseService(user.uid);
+    if (!(await database.checkIfUserExists())) {
+      database.setTodo('Todo anlegen', false);
+    }
+    Stream userDocStream = database.getTodos();
+    userDocStream.listen( (documentSnapshot) => debugPrint(documentSnapshot.data) );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    connectToFirebase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'To-Do App!',
+              style: TextStyle(
+                fontSize: 40,
+                fontFamily: "Times New Roman",
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromRGBO(150, 255, 20, 100),
+              ),
+            ),
+            // Solid text as fill.
+            Text(
+              'To-Do App!',
+              style: TextStyle(
+                fontSize: 40,
+                fontFamily: "Times New Roman",
+                color: Colors.grey[175],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.lightGreen,
+      ),
+      body:
+      const Center(child: Text('Hier kommen Todos hin')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: newEntry,
+        backgroundColor: const Color.fromRGBO(35, 152, 25, 100),
+        child: const Icon(Icons.data_saver_on)
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class DatabaseService {
+  final String userID;
+  DatabaseService(this.userID);
+
+  final CollectionReference userTodos =
+    FirebaseFirestore.instance.collection('userToDos');
+
+  Future setTodo(String item, bool value) async {
+    return await userTodos.doc(userID).set({item: value}, SetOptions(merge: true));
+
+  }
+
+  Future deleteTodo(String key) async {
+    return await userTodos.doc(userID).update({
+      key: FieldValue.delete(),
+    });
+  }
+  Future checkIfUserExists() async {
+    return (await FirebaseFirestore.instance.doc(userID).get()).exists;
+    }
+  Stream getTodos() {
+    return userTodos.doc(userID).snapshots();
+  }
+  }
+
+
+
+
+
+
+import 'package:flutter/material.dart';
+
+class AddItemDialog extends StatefulWidget {
+  final void Function(String txt) addItem;
+  const AddItemDialog(this.addItem, {super.key});
+
+  @override
+  _AddItemDialogState createState() => _AddItemDialogState();
+}
+
+class _AddItemDialogState extends State<AddItemDialog> {
+  final GlobalKey<FormState> formKey = GlobalKey();
+  late String item;
+
+  void save() {
+    if (formKey.currentState!.validate()) {
+      widget.addItem(item);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextFormField(
+                onChanged: (String txt) => item = txt,
+                onFieldSubmitted: (String txt) => save(),
+                validator: (v) {
+                  if (v!.startsWith(" ") || v.isEmpty) {
+                    return 'Bitte Aufgabe eintragen!';
+                  }
+                  return null;
+                },
+              ),
+              ElevatedButton(
+                onPressed: save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  foregroundColor: Colors.limeAccent,
+                  shadowColor: Colors.teal,
+                ),
+                child: const Text(
+                  'Auf die Liste',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ],
+          )),
+    );
+  }
+}
+
+
+
+
+
+import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class DetailScreen extends StatelessWidget {
+  const DetailScreen(this.title, this.done, {super.key});
+  final String title;
+  final bool done;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: done ? Colors.green : Colors.red,
+        appBar: AppBar(
+          title: const Text('Details'),
+          backgroundColor: Colors.transparent,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 70),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Expanded(
+                    child: Container(
+                        padding: const EdgeInsets.all(20),
+                        alignment: Alignment.center,
+                        child: Text(
+                          done
+                              ? 'Das hast du schon erledigt:'
+                              : 'Das musst du noch machen:',
+                          style: const TextStyle(fontSize: 20, color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ))),
+                Expanded(
+                    child: Container(
+                        padding: const EdgeInsets.all(20),
+                        alignment: Alignment.center,
+                        child: Text(
+                          textAlign: TextAlign.center,
+                          title,
+                          style: GoogleFonts.staatliches(
+                              textStyle: const TextStyle(
+                                  fontSize: 35,
+                                  color: Colors.white,
+                                  letterSpacing: 2)),
+                        ))),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      IconButton(
+                        iconSize: 60,
+                        onPressed: () {
+                          String message;
+                          if (done) {
+                            message = 'Ich habe "$title" erledigt!';
+                          } else {
+                            message = 'Das muss noch erledigt werden: "$title"';
+                          }
+                          Share.share(message);
+                        },
+                        icon: const Icon(Icons.share, color: Colors.white),
+                      ),
+                      IconButton(
+                        iconSize: 60,
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                            done
+                                ? Icons.thumb_up_alt_outlined
+                                : Icons.thumb_down_alt_outlined,
+                            color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+        ));
+  }
+}
+
+
+
+
+import 'package:flutter/material.dart';
+import 'detail_screen.dart';
+
+class ToDoItem extends StatelessWidget {
+  final String title;
+  final bool done;
+  final Function remove;
+  final Function toggleDone;
+  const ToDoItem(this.title, this.done, this.remove, this.toggleDone, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+            leading: Checkbox(
+              value: done,
+              onChanged: (value) => toggleDone(),
+              activeColor: Colors.greenAccent,
+              checkColor: Colors.limeAccent,
+            ),
+            title: Text(
+              title,
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.w600,
+                color: done ? Colors.teal : Colors.black54,
+                decoration: done
+                    ? TextDecoration.lineThrough
+                    : TextDecoration.underline,
+              ),
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete_sweep_outlined),
+              onPressed: () => remove(),
+            ),
+            onTap: () {
+              Navigator.push<Widget>(
+                  context,
+                  MaterialPageRoute<Widget>(
+                      builder: (BuildContext context) =>
+                          DetailScreen(title, done)));
+            }));
+  }
+}
