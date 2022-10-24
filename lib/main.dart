@@ -64,7 +64,7 @@ class _ToDoState extends State<ToDo> {
     user = result.user!;
     database = DatabaseService(user.uid);
 
-    if ((await database?.checkIfUserExists())) {
+    if (!(await database?.checkIfUserExists())) {
     } else {database?.setTodo('Todo anlegen', false);}
   }
 
@@ -162,7 +162,7 @@ class _ToDoState extends State<ToDo> {
                   child: FloatingActionButton(
                     onPressed: deleteAll,
                     tooltip: "Lösche alle deine gespeicherten ToDo's",
-                    backgroundColor: const Color(0x8C727272),
+                    backgroundColor: const Color.fromRGBO(35, 152, 25, 100),
                     child: const Icon(Icons.phonelink_erase_rounded),
                   ),
                 )
