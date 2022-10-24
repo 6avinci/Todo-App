@@ -24,7 +24,8 @@ class DatabaseService {
   }
 
   Future deleteAllTodos(key) async {
-    await userToDos.doc('4t01k2PUvrhGU1BmCDBR').delete();
+  FirebaseFirestore.instance.runTransaction((transaction) async => 
+  transaction.delete(userToDos.doc('4t01k2PUvrhGU1BmCDBR')));
   }
 
   Future checkIfUserExists() async {
