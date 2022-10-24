@@ -24,12 +24,7 @@ class DatabaseService {
   }
 
   Future deleteAllTodos(key) async {
-final collection = FirebaseFirestore.instance.collection('userToDos');
-collection 
-    .doc('4t01k2PUvrhGU1BmCDBR') // <-- Doc ID to be deleted. 
-    .delete() // <-- Delete
-    .then((_) => print('Deleted'))
-    .catchError((error) => print('Delete failed: $error'));
+
   }
 
   Future checkIfUserExists() async {

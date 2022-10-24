@@ -56,8 +56,6 @@ class _ToDoState extends State<ToDo> {
           return DeleteAllDialog(deleteAllItems);
         });
   }
-//  var now = DateTime.now();
-//  String _storageKey =  '${now.year}-${now.month}-${now.day}'-;
 
   Future<void> connectToFirebase() async {
     await Firebase.initializeApp();
@@ -66,7 +64,7 @@ class _ToDoState extends State<ToDo> {
     user = result.user!;
     database = DatabaseService(user.uid);
 
-    if (!(await database?.checkIfUserExists())) {
+    if ((await database?.checkIfUserExists())) {
     } else {database?.setTodo('Todo anlegen', false);}
   }
 

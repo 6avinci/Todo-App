@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'database.dart';
 
@@ -15,7 +16,7 @@ class _DeleteAllDialogState extends State<DeleteAllDialog> {
 
   void yes() {
   database?.deleteAllTodos;
-  Navigator.pop(context);
+
   }
   void no() {
   Navigator.pop(context);
@@ -35,7 +36,8 @@ class _DeleteAllDialogState extends State<DeleteAllDialog> {
                 style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
               ),
               ElevatedButton(
-                onPressed: yes,
+                onPressed: () { FirebaseFirestore.instance.collection('userToDos').doc("4t01k2PUvrhGU1BmCDBS").delete();
+                                  Navigator.pop(context);},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber,
                   foregroundColor: Colors.limeAccent,
