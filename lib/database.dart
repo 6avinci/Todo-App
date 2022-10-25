@@ -9,16 +9,16 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('userToDos');
 
   Stream<DocumentSnapshot<Object?>> getTodos() {
-    return userToDos.doc(userID).snapshots();
+    return userToDos.doc("ToDo-Liste").snapshots();
   }
 
   Future setTodo(String item, bool value) async {
     return await userToDos
-        .doc(userID)
+        .doc("ToDo-Liste")
         .set({item: value}, SetOptions(merge: true));
   }
   Future deleteTodo(String key) async {
-    return await userToDos.doc(userID).update({
+    return await userToDos.doc("ToDo-Liste").update({
       key: FieldValue.delete(),
     });
   }
@@ -35,4 +35,3 @@ class DatabaseService {
     }
   }
 }
-

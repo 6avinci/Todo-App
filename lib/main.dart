@@ -65,7 +65,7 @@ class _ToDoState extends State<ToDo> {
     database = DatabaseService(user.uid);
 
     if ((await database?.checkIfUserExists())) {
-    } else {database?.setTodo('Todo anlegen', false);}
+    } else {database?.setTodo('Todo werden hier gezeigt!', false);}
   }
 
   @override
