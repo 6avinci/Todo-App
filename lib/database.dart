@@ -9,16 +9,16 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('userToDos');
 
   Stream<DocumentSnapshot<Object?>> getTodos() {
-    return userToDos.doc('4t01k2PUvrhGU1BmCDBR').snapshots();
+    return userToDos.doc(userID).snapshots();
   }
 
   Future setTodo(String item, bool value) async {
     return await userToDos
-        .doc('4t01k2PUvrhGU1BmCDBR')
+        .doc(userID)
         .set({item: value}, SetOptions(merge: true));
   }
   Future deleteTodo(String key) async {
-    return await userToDos.doc('4t01k2PUvrhGU1BmCDBR').update({
+    return await userToDos.doc(userID).update({
       key: FieldValue.delete(),
     });
   }

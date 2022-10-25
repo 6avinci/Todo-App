@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'database.dart';
 
@@ -36,8 +37,12 @@ class _DeleteAllDialogState extends State<DeleteAllDialog> {
                 style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
               ),
               ElevatedButton(
-                onPressed: () { FirebaseFirestore.instance.collection('userToDos').doc("4t01k2PUvrhGU1BmCDBS").delete();
-                                  Navigator.pop(context);},
+                onPressed: () { 
+                                FirebaseFirestore.instance.collection('userToDos').doc(this.database?.userID).delete();
+                                Navigator.pop(context);
+                              //  Map<String, bool> demoData = { "Test1234": true }; 
+                              //  FirebaseFirestore.instance .collection('userToDos').doc(database?.userID).set(demoData);
+                                  },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber,
                   foregroundColor: Colors.limeAccent,
