@@ -41,7 +41,7 @@ class _DeleteAllDialogState extends State<DeleteAllDialog> {
                                 FirebaseFirestore.instance.collection('userToDos').doc("ToDo-Liste").delete();
                                 Navigator.pop(context);
                                 Map<String, bool> demoData = { "ToDos werden hier gezeigt!": true }; 
-                                FirebaseFirestore.instance .collection('userToDos').doc("ToDo-Liste").set(demoData);
+                                FirebaseFirestore.instance .collection('userToDos').doc('ToDo-Liste').set(demoData);
                                   },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber,
